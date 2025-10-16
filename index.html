@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Who is Goku? — Mini GitHub Project</title>
+  <meta name="description" content="Who is Goku? A minimal, responsive demo page with an intro 3D animation, warning prompt, and high-quality responsive video popup." />
+  <link rel="canonical" href="/" />
+  <meta name="robots" content="index,follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Who is Goku?" />
+  <meta property="og:description" content="Short intro and high-quality responsive video about Son Goku." />
+  <meta property="og:type" content="website" />
+
+  <!-- Structured data for basic SEO (VideoObject) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "Who is Goku? - Intro Video",
+    "description": "Short high-quality responsive video introducing Son Goku.",
+    "thumbnailUrl": [],
+    "uploadDate": "2025-10-16"
+  }
+  </script>
+
+  <style>
+    :root{--bg:#071427;--card:#0f1724;--accent:#ff9800;--text:#e6eef8;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;color:var(--text);background:linear-gradient(180deg,#02030b 0%, #071427 100%)}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:1100px;padding:28px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+
+    header{display:flex;gap:20px;align-items:center}
+    .logo{width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#ffb74d,#ff7043);display:flex;align-items:center;justify-content:center;font-weight:800;color:#111;font-size:26px}
+    h1{margin:0;font-size:34px;line-height:1}
+    p.lead{margin:8px 0 18px;color:rgba(230,238,248,0.9)}
+
+    .layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:center}
+    @media (max-width:880px){.layout{grid-template-columns:1fr} .logo{width:60px;height:60px}}
+
+    /* 3D animated intro */
+    .intro-scene{height:220px;display:flex;align-items:center;justify-content:center;perspective:1200px}
+    .card-face{width:100%;max-width:720px;height:140px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transform-style:preserve-3d}
+    .title-3d{font-size:48px;font-weight:800;letter-spacing:1px;transform-origin:center;will-change:transform,opacity}
+
+    /* animation keyframes */
+    @keyframes flipIn  {
+      0%{transform:rotateX(80deg) translateZ(-120px) scale(0.95);opacity:0}
+      60%{transform:rotateX(-12deg) translateZ(20px) scale(1.02);opacity:1}
+      100%{transform:none;opacity:1}
+    }
+
+    @keyframes glow  {
+      0%{text-shadow:0 0 0 rgba(255,152,0,0)}
+      50%{text-shadow:0 8px 30px rgba(255,152,0,0.12)}
+      100%{text-shadow:0 0 0 rgba(255,152,0,0)}
+    }
+
+    .title-3d.animate{animation:flipIn 1.1s cubic-bezier(.2,.9,.22,1) both, glow 2.6s ease-in-out infinite}
+
+    /* CTA - hidden until intro finishes */
+    .cta{display:flex;gap:12px;align-items:center;margin-top:16px}
+    .btn{position:relative;display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ff6f00);color:#081018;font-weight:800;border:none;cursor:pointer;outline:none;box-shadow:0 6px 20px rgba(255,152,0,0.14);transform:translateZ(0)}
+    .btn::after{content:"";position:absolute;inset:0;border-radius:999px;box-shadow:0 0 0 0 rgba(255,152,0,0.22);animation:btnPulse 2.4s infinite}
+    @keyframes btnPulse{0%{box-shadow:0 0 0 0 rgba(255,152,0,0.22)}70%{box-shadow:0 0 0 14px rgba(255,152,0,0)}100%{box-shadow:0 0 0 0 rgba(255,152,0,0)}}
+    .btn.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+
+    .avatar{width:100%;height:220px;border-radius:10px;background:linear-gradient(180deg,#071a2d,#092033);display:flex;align-items:center;justify-content:center;padding:12px}
+    .avatar img{max-width:100%;height:auto;border-radius:6px;display:block}
+
+    /* MODALS */
+    .backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:1200}
+    .modal{width:100%;max-width:980px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(2,6,23,0.8)}
+    .modal .head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--glass)}
+
+    /* Responsive video container */
+    .video-wrap{position:relative;width:100%;padding-top:56.25%;background:#000}
+    .video-wrap video, .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+
+    .controls{display:flex;gap:10px;align-items:center}
+    .close{background:transparent;border:0;color:var(--text);font-weight:700;cursor:pointer;padding:8px 12px}
+
+    /* small helpful SEO/perf optimizations */
+    img{max-width:100%;height:auto;display:block}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    @media (max-width:520px){.title-3d{font-size:28px}.intro-scene{height:140px}.video-wrap{padding-top:56.25%}}
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){.title-3d.animate{animation:none}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article class="card" role="main">
+      <header>
+        <div class="logo" aria-hidden="true">G</div>
+        <div>
+          <h1>Who is Goku?</h1>
+          <p class="lead">Minimal demo. Plays a responsive, high-quality video inside a popup. Works across devices. Accessible and SEO-friendly.</p>
+        </div>
+      </header>
+
+      <section style="margin-top:18px">
+        <div class="intro-scene" aria-hidden="false">
+          <div class="card-face">
+            <div id="title3d" class="title-3d">Who is Goku?</div>
+          </div>
+        </div>
+
+        <div class="layout">
+          <div>
+            <p><strong>Son Goku</strong> is legendary for his drive, kindness, and unmatched fighting spirit. This page demonstrates a focused UX: 3D intro, confirmation warning, and fully responsive playback.</p>
+
+            <div class="cta" id="ctaWrap">
+              <button id="primaryBtn" class="btn hidden" aria-haspopup="dialog" aria-controls="confirmModal">▶ Watch intro</button>
+              <button id="muteBtn" class="btn">Mute</button>
+            </div>
+
+            <p style="margin-top:12px;font-size:13px;color:rgba(230,238,248,0.7)">Tip: the button appears after the intro animation finishes. Mobile-friendly; tap to confirm before playback.</p>
+          </div>
+
+          <aside class="avatar" aria-hidden="true">
+            <img src="goku.png" alt="Goku portrait"/>
+          </aside>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <!-- Confirm warning modal (must accept to see video) -->
+  <div id="confirmModal" class="backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <div class="head">
+        <h3 id="confirmTitle">Viewer Notice</h3>
+        <div class="controls"><button class="close" id="confirmClose">Close</button></div>
+      </div>
+      <div style="padding:18px">
+        <p><strong>Notice:</strong> You are about to watch a video that contains familiar content. Please confirm you have the right to view or share this material in your context.</p>
+        <p style="margin-top:10px;color:rgba(230,238,248,0.8)">If you accept, the video will open in a popup and begin playback. If you need subtitles or lower bandwidth, use the player controls after playback starts.</p>
+        <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end">
+          <button id="decline" class="btn">Cancel</button>
+          <button id="accept" class="btn">I understand - Open video</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video modal -->
+  <div id="videoModal" class="backdrop" role="dialog" aria-modal="true" aria-labelledby="videoTitle">
+    <div class="modal">
+      <div class="head">
+        <h3 id="videoTitle">Goku — Intro</h3>
+        <div class="controls"><button class="close" id="closeVideo">Close</button></div>
+      </div>
+      <div style="padding:0">
+        <div class="video-wrap">
+          <!-- Local video file (preferred, high-quality). Replace the src if needed. -->
+          <video id="localVideo" playsinline controls preload="metadata" webkit-playsinline>
+            <source src="b1fa6da11bab03a44b6c668d40afd74f.mp4" type="video/mp4">
+            Your browser does not support HTML5 video. Consider using a modern browser.
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const title = document.getElementById('title3d');
+    const primaryBtn = document.getElementById('primaryBtn');
+    const ctaWrap = document.getElementById('ctaWrap');
+    const confirmModal = document.getElementById('confirmModal');
+    const videoModal = document.getElementById('videoModal');
+    const accept = document.getElementById('accept');
+    const decline = document.getElementById('decline');
+    const confirmClose = document.getElementById('confirmClose');
+    const closeVideo = document.getElementById('closeVideo');
+    const localVideo = document.getElementById('localVideo');
+    const muteBtn = document.getElementById('muteBtn');
+
+    let muted = false;
+
+    // Start intro animation sequence on load
+    function startIntro(){
+      title.classList.add('animate');
+      // ensure the CTAs show after animation ends (match animation duration)
+      const introDuration = 1200; // ms - keep synced with CSS flipIn 1.1s
+      setTimeout(()=>{
+        // reveal CTA with small stagger
+        primaryBtn.classList.remove('hidden');
+        primaryBtn.setAttribute('aria-hidden','false');
+        primaryBtn.focus();
+      }, introDuration + 300);
+    }
+
+    // Open confirm modal
+    primaryBtn.addEventListener('click', ()=>{
+      confirmModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      accept.focus();
+    });
+
+    function closeConfirm(){
+      confirmModal.style.display = 'none';
+      document.body.style.overflow = '';
+      primaryBtn.focus();
+    }
+
+    // Accept -> open video modal and autoplay video
+    accept.addEventListener('click', ()=>{
+      closeConfirm();
+      openVideoModal(true);
+    });
+
+    decline.addEventListener('click', closeConfirm);
+    confirmClose.addEventListener('click', closeConfirm);
+
+    function openVideoModal(autoplay=false){
+      videoModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      // set muted state
+      localVideo.muted = muted;
+      // try to play with promises
+      if(autoplay){
+        const playPromise = localVideo.play();
+        if(playPromise !== undefined){
+          playPromise.catch(()=>{
+            // autoplay failed (browser restriction): show controls and prompt user
+            localVideo.controls = true;
+          });
+        }
+      }
+      closeVideo.focus();
+    }
+
+    function closeVideoModal(){
+      videoModal.style.display = 'none';
+      // pause and reset to start for a clean reopen
+      try{ localVideo.pause(); localVideo.currentTime = 0; }catch(e){}
+      document.body.style.overflow = '';
+      primaryBtn.focus();
+    }
+
+    closeVideo.addEventListener('click', closeVideoModal);
+
+    // backdrop close
+    [confirmModal, videoModal].forEach(mod=>{
+      mod.addEventListener('click', (e)=>{ if(e.target === mod) {
+        if(mod === videoModal) closeVideoModal(); else closeConfirm();
+      }});
+    });
+
+    // Escape key
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        if(videoModal.style.display === 'flex') closeVideoModal();
+        if(confirmModal.style.display === 'flex') closeConfirm();
+      }
+    });
+
+    // Mute toggle
+    muteBtn.addEventListener('click', ()=>{
+      muted = !muted;
+      localVideo.muted = muted;
+      muteBtn.textContent = muted ? 'Muted' : 'Mute';
+    });
+
+    // Accessibility: keep focus in modal when open
+    document.addEventListener('focus', function(event){
+      if((videoModal.style.display === 'flex' || confirmModal.style.display === 'flex') && !document.querySelector('.backdrop').contains(event.target)){
+        event.stopPropagation();
+        document.querySelector('.close')?.focus();
+      }
+    }, true);
+
+    // On load
+    window.addEventListener('load', ()=>{
+      startIntro();
+
+      // Performance tips: prefer metadata preload; video is metadata-preloaded above
+      // For SEO: server should provide proper caching headers and sitemap.xml; this is the static single-file front-end.
+    });
+
+    // Quality note: HTML5 can't force higher resolution than the source. If you need multi-bitrate streaming, use HLS or DASH or serve multiple files and let user choose.
+  </script>
+</body>
+</html>
